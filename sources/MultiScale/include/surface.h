@@ -14,10 +14,7 @@
 #include <vtkMapper.h>
 #endif
 
-#include <Eigen/Core>
-#include <Eigen/Sparse>
-#include <Eigen/Geometry>
-#include <Eigen/Dense>
+#include <glm/glm.hpp>
 
 //#include <embree3/rtcore.h>
 //#include <embree3/rtcore_ray.h>
@@ -26,42 +23,44 @@
 using namespace vtk;
 #endif
 using namespace std;
-using namespace Eigen;
 
 class Fiber;
 
 class Surface
 {
 public:
-    /* Load surface from file surface_file */
-    Surface(string surface_file);
-    /* Destructor of Surface objects */
-    ~Surface();
-    /* Return the eboSurface pointer */
-    GLuint getEboSurface() {return m_eboSurface;}
-    /* Return the vboSurface pointer */
-    GLuint getVboSurface() {return m_vboSurface;}
-    /* Return the number of points of the surface*/
-    unsigned int getNbPoints() {return static_cast<unsigned int>(m_surfacePoints.size());}
-    /* Return the number of triangles of the surface*/
-    unsigned int getNbTriangles() {return static_cast<unsigned int>(m_surfaceTriangles.size());}
-    /* Return true if the point is inside the surface */
-    bool isInside(Vector3f point);
-    /* Return true if there is an intersection with the surface, returning the intersection point */
-    bool intersect(Vector3f origin, Vector3f direction, Vector3f &intersection);
+	/* Load surface from file surface_file */
+	Surface(string surface_file);
+	/* Destructor of Surface objects */
+	~Surface();
+	/* Return the vaoSurface pointer */
+	GLuint getVaoSurface() {return m_vaoSurface;}
+	/* Return the eboSurface pointer */
+	GLuint getEboSurface() {return m_eboSurface;}
+	/* Return the vboSurface pointer */
+	GLuint getVboSurface() {return m_vboSurface;}
+	/* Return the number of points of the surface*/
+	unsigned int getNbPoints() {return static_cast<unsigned int>(m_surfacePoints.size());}
+	/* Return the number of triangles of the surface*/
+	unsigned int getNbTriangles() {return static_cast<unsigned int>(m_surfaceTriangles.size());}
+	/* Return true if the point is inside the surface */
+	bool isInside(Vector3f point);
+	/* Return true if there is an intersection with the surface, returning the intersection point */
+	bool intersect(Vector3f origin, Vector3f direction, Vector3f &intersection);
 
 private:
-    /* Compute a BVH with the triangles to make intersection computation faster */
-    void computeBVH();
+	/* Compute a BVH with the triangles to make intersection computation faster */
+	void computeBVH();
 
-    vector<Vector3f> m_surfacePoints;
-    vector<Vector3i> m_surfaceTriangles;
-    vector<Vector3f> m_surfaceNormals;
+	vector<Vector3f> m_surfacePoints;
+	vector<Vector3i> m_surfaceTriangles;
+	vector<Vector3f> m_surfaceNormals;
 
-    GLuint m_eboSurface;
-    GLuint m_vboSurface;
+	GLuint m_vaoSurface;
+	GLuint m_eboSurface;
+	GLuint m_vboSurface;
 
-    //For raytracing
+	//For raytracing
 //    bool launchRayInside(float dirX, float dirY, float dirZ, float tfar, Vector3f point);
 //    bool launchRay(Vector3f direction, float tfar, Vector3f origin, Vector3f &intersection);
 //    void rtcInitialize();

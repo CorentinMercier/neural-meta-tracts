@@ -1,8 +1,7 @@
 #ifndef OPENGLUTILS_H
 #define OPENGLUTILS_H
 
-#include <GL/glew.h>
-#include <GL/gl.h>
+#include <glad/glad.h>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -15,9 +14,9 @@ using namespace std;
 
 typedef struct
 {
-    GLenum type;
-    const char* filename;
-    GLuint shader;
+	GLenum type;
+	const char* filename;
+	GLuint shader;
 }ShaderInfo;
 
 //Function returning the ID of the program using the shaders included in ShaderInfo

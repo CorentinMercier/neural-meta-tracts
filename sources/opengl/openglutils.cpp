@@ -1,87 +1,89 @@
 #include "openglutils.h"
+#include <GL/glu.h>
+#include <GL/gl.h>
 
 static const GLchar* readShader(const char* filename)
 {
-    FILE* file=fopen(filename, "rb");
-    if (!file)
-        return nullptr;
-    fseek( file, 0, SEEK_END );
-    int len = ftell( file );
-    fseek( file, 0, SEEK_SET );
-    GLchar* content=new GLchar[len+1];
-    if (fread(content, 1, len, file)==0)
-    {
-        cerr << "Error while reading shaders" << endl;
-    }
-    fclose(file);
-    content[len]=0;
-    return const_cast<const GLchar*>(content);
+	FILE* file=fopen(filename, "rb");
+	if (!file)
+		return nullptr;
+	fseek( file, 0, SEEK_END );
+	int len = ftell( file );
+	fseek( file, 0, SEEK_SET );
+	GLchar* content=new GLchar[len+1];
+	if (fread(content, 1, len, file)==0)
+	{
+		cerr << "Error while reading shaders" << endl;
+	}
+	fclose(file);
+	content[len]=0;
+	return const_cast<const GLchar*>(content);
 }
 
 
 GLuint loadShaders(ShaderInfo *shaders)
 {
-    if (shaders == nullptr)
-    {
-        cerr << "Pas de shaders trouvés" << endl;
-        return 0;
-    }
-    GLuint program = glCreateProgram();
+	if (shaders == nullptr)
+	{
+		cerr << "Pas de shaders trouvés" << endl;
+		return 0;
+	}
+	GLuint program = glCreateProgram();
 
-    ShaderInfo* entry = shaders;
-    while(entry->type!=GL_NONE)
-    {
-        GLuint shader=glCreateShader(entry->type);
-        const GLchar* source=readShader(entry->filename);
-        if (source==nullptr)
-        {
-            cerr << "Pas de contenu dans le shader " << entry->filename << endl;
-            for (entry=shaders; entry->type!=GL_NONE; ++entry)
-            {
-                glDeleteShader(entry->shader);
-                entry->shader=0;
-            }
-            return 0;
-        }
-        glShaderSource(shader, 1, &source, nullptr);
-        delete[] source;
-        glCompileShader(shader);
-        GLint compiled;
-        glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
-        if(!compiled)
-        {
-            GLsizei len;
-            glGetShaderiv( shader, GL_INFO_LOG_LENGTH, &len );
+	ShaderInfo* entry = shaders;
+	while(entry->type!=GL_NONE)
+	{
+		GLuint shader=glCreateShader(entry->type);
+		const GLchar* source=readShader(entry->filename);
+		if (source==nullptr)
+		{
+			cerr << "Pas de contenu dans le shader " << entry->filename << endl;
+			for (entry=shaders; entry->type!=GL_NONE; ++entry)
+			{
+				glDeleteShader(entry->shader);
+				entry->shader=0;
+			}
+			return 0;
+		}
+		glShaderSource(shader, 1, &source, nullptr);
+		delete[] source;
+		glCompileShader(shader);
+		GLint compiled;
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+		if(!compiled)
+		{
+			GLsizei len;
+			glGetShaderiv( shader, GL_INFO_LOG_LENGTH, &len );
 
-            GLchar* log = new GLchar[len+1];
-            glGetShaderInfoLog( shader, len, &len, log );
-            std::cerr << "Shader compilation failed: " << log << std::endl;
-            delete [] log;
-            return 0;
-        }
-        glAttachShader(program, shader);
-        ++entry;
-    }
-    glLinkProgram(program);
-    GLint linked;
-    glGetProgramiv(program, GL_LINK_STATUS, &linked);
-    if(!linked)
-    {
-        GLsizei len;
-        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &len);
-        GLchar* log = new GLchar[len+1];
-        glGetProgramInfoLog( program, len, &len, log );
-        std::cerr << "Program linkage failed: " << log << std::endl;
-        delete [] log;
+			GLchar* log = new GLchar[len+1];
+			glGetShaderInfoLog( shader, len, &len, log );
+			std::cerr << "Shader compilation failed: " << log << std::endl;
+			delete [] log;
+			return 0;
+		}
+		glAttachShader(program, shader);
+		++entry;
+	}
+	glLinkProgram(program);
+	GLint linked;
+	glGetProgramiv(program, GL_LINK_STATUS, &linked);
+	if(!linked)
+	{
+		GLsizei len;
+		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &len);
+		GLchar* log = new GLchar[len+1];
+		glGetProgramInfoLog( program, len, &len, log );
+		std::cerr << "Program linkage failed: " << log << std::endl;
+		delete [] log;
 
-        for ( entry = shaders; entry->type != GL_NONE; ++entry ) {
-            glDeleteShader( entry->shader );
-            entry->shader = 0;
-        }
-        cerr << "Erreur de linkage du shader program" << endl;
-        return 0;
-    }
-    return program;
+		for ( entry = shaders; entry->type != GL_NONE; ++entry ) {
+			glDeleteShader( entry->shader );
+			entry->shader = 0;
+		}
+		cerr << "Erreur de linkage du shader program" << endl;
+		return 0;
+	}
+	return program;
 }
 
 /*****************************************************************************\
@@ -89,18 +91,18 @@ GLuint loadShaders(ShaderInfo *shaders)
 \*****************************************************************************/
 bool print_opengl_error(const char *file, int line)
 {
-    // Returns true if an OpenGL error occurred, false otherwise.
-    GLenum error;
-    bool   ret_code = false;
+	// Returns true if an OpenGL error occurred, false otherwise.
+	GLenum error;
+	bool   ret_code = false;
 
-    error = glGetError();
-    while (error != GL_NO_ERROR)
-    {
-        cerr << "glError in file " << file << ", line " << line << ": " << gluErrorString(error) << endl;
-        ret_code = true;
-        error = glGetError();
-    }
-    return ret_code;
+	error = glGetError();
+	while (error != GL_NO_ERROR)
+	{
+		cerr << "glError in file " << file << ", line " << line << ": " << gluErrorString(error) << endl;
+		ret_code = true;
+		error = glGetError();
+	}
+	return ret_code;
 }
 
 GLint get_uni_loc(GLuint program, const GLchar *name)
@@ -109,7 +111,7 @@ GLint get_uni_loc(GLuint program, const GLchar *name)
 
   loc = glGetUniformLocation(program, name); PRINT_OPENGL_ERROR();
   if (loc == -1)
-    std::cerr << "No such uniform named \"" << name << "\"" << std::endl;
+	std::cerr << "No such uniform named \"" << name << "\"" << std::endl;
 
   return loc;
 }

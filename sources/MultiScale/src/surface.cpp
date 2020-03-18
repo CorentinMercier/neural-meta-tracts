@@ -4,73 +4,76 @@
 Surface::Surface(string surface_file)
 {
 #ifdef USE_VTK
-    vtkSmartPointer<vtkGenericDataObjectReader> reader = vtkSmartPointer<vtkGenericDataObjectReader>::New();
-    reader->SetFileName(surface_file.c_str());
-    reader->Update();
-    vtkSmartPointer<vtkPolyData> mesh  = vtkSmartPointer<vtkPolyData>::New();
-    mesh=reader->GetPolyDataOutput();
-    unsigned int nbVertices = static_cast<unsigned int>(mesh->GetNumberOfPoints());
-    unsigned int nbTriangles = static_cast<unsigned int>(mesh->GetNumberOfPolys());
-    if (nbTriangles==0)
-    {
-        vtkSmartPointer<vtkTriangleFilter> filter  = vtkSmartPointer<vtkTriangleFilter>::New();
-        filter->SetInputConnection(reader->GetOutputPort());
-        filter->Update();
-        mesh = filter->GetOutput();
-    }
-    nbTriangles = static_cast<unsigned int>(mesh->GetNumberOfPolys());
+	vtkSmartPointer<vtkGenericDataObjectReader> reader = vtkSmartPointer<vtkGenericDataObjectReader>::New();
+	reader->SetFileName(surface_file.c_str());
+	reader->Update();
+	vtkSmartPointer<vtkPolyData> mesh  = vtkSmartPointer<vtkPolyData>::New();
+	mesh=reader->GetPolyDataOutput();
+	unsigned int nbVertices = static_cast<unsigned int>(mesh->GetNumberOfPoints());
+	unsigned int nbTriangles = static_cast<unsigned int>(mesh->GetNumberOfPolys());
+	if (nbTriangles==0)
+	{
+		vtkSmartPointer<vtkTriangleFilter> filter  = vtkSmartPointer<vtkTriangleFilter>::New();
+		filter->SetInputConnection(reader->GetOutputPort());
+		filter->Update();
+		mesh = filter->GetOutput();
+	}
+	nbTriangles = static_cast<unsigned int>(mesh->GetNumberOfPolys());
 
-    cout << "This surface is composed of " << nbTriangles << " triangles and " << nbVertices << " vertices" << endl;
+	cout << "This surface is composed of " << nbTriangles << " triangles and " << nbVertices << " vertices" << endl;
 
-    //Acquiring the points of the surface
-    m_surfacePoints.resize(nbVertices);
-    m_surfaceNormals.resize(nbVertices);
-    vector<int> nbNormals(nbVertices);
-    for (unsigned int i=0; i<nbVertices; i++)
-    {
-        double p[3];
-        mesh->GetPoint(i,p);
-        m_surfacePoints[i] = Vector3f(static_cast<float>(p[0]), static_cast<float>(p[1]), static_cast<float>(p[2]));
-        m_surfaceNormals[i] = Vector3f(0);
-        nbNormals[i]=0;
-    }
-    vtkSmartPointer<vtkIdList> idList = vtkSmartPointer<vtkIdList>::New();
-    vtkSmartPointer<vtkCellArray> triangles = vtkSmartPointer<vtkCellArray>::New();
-    triangles = mesh->GetPolys();
-    m_surfaceTriangles.resize(nbTriangles);
-    for (unsigned int i=0; i<nbTriangles; i++)
-    {
-        triangles->GetNextCell(idList);
-        m_surfaceTriangles[i] = Vector3i(static_cast<int>(idList->GetId(0)), static_cast<int>(idList->GetId(1)), static_cast<int>(idList->GetId(2)));
-    }
-    //Creation of the normal per vertex
-    for (unsigned int i=0; i<nbTriangles; i++)
-    {
-        Vector3f currentNormal = (m_surfacePoints[static_cast<unsigned int>(m_surfaceTriangles[i](1))]-m_surfacePoints[static_cast<unsigned int>(m_surfaceTriangles[i](0))])
-                                 .cross(m_surfacePoints[static_cast<unsigned int>(m_surfaceTriangles[i](2))]-m_surfacePoints[static_cast<unsigned int>(m_surfaceTriangles[i](1))]);
-        for (unsigned int j=0; j<3; j++)
-        {
-            nbNormals[static_cast<unsigned int>(m_surfaceTriangles[i](j))]++;
-            m_surfaceNormals[static_cast<unsigned int>(m_surfaceTriangles[i](j))]+=currentNormal;
-        }
-    }
-    for (unsigned int i=0; i<nbVertices; i++)
-    {
-        m_surfaceNormals[i]/=nbNormals[i];
-        m_surfaceNormals[i].normalized();
-    }
-    glCreateBuffers(1, &m_vboSurface);
-    glCreateBuffers(1, &m_eboSurface);
-    glBindBuffer(GL_ARRAY_BUFFER, m_vboSurface); PRINT_OPENGL_ERROR();
-    glBufferData(GL_ARRAY_BUFFER, m_surfacePoints.size()*3*sizeof(float)*2, NULL, GL_STATIC_DRAW); PRINT_OPENGL_ERROR();
-    glBufferSubData(GL_ARRAY_BUFFER, 0, m_surfacePoints.size()*3*sizeof(float), m_surfacePoints.data()); PRINT_OPENGL_ERROR();
-    glBufferSubData(GL_ARRAY_BUFFER, m_surfacePoints.size()*3*sizeof(float), m_surfacePoints.size()*3*sizeof(float), m_surfaceNormals.data()); PRINT_OPENGL_ERROR();
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_eboSurface); PRINT_OPENGL_ERROR();
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_surfaceTriangles.size()*3*sizeof(int), m_surfaceTriangles.data(), GL_STATIC_DRAW); PRINT_OPENGL_ERROR();
-    cout << "Surface " << surface_file << " loaded" << endl;
-    //bvh = new BVH(m_surfaceTriangles, m_surfacePoints);
-    //rtcInitialize();
-    cout << "Initialization complete" << endl;
+	//Acquiring the points of the surface
+	m_surfacePoints.resize(nbVertices);
+	m_surfaceNormals.resize(nbVertices);
+	vector<int> nbNormals(nbVertices);
+	for (unsigned int i=0; i<nbVertices; i++)
+	{
+		double p[3];
+		mesh->GetPoint(i,p);
+		m_surfacePoints[i] = Vector3f(static_cast<float>(p[0]), static_cast<float>(p[1]), static_cast<float>(p[2]));
+		m_surfaceNormals[i] = Vector3f(0);
+		nbNormals[i]=0;
+	}
+	vtkSmartPointer<vtkIdList> idList = vtkSmartPointer<vtkIdList>::New();
+	vtkSmartPointer<vtkCellArray> triangles = vtkSmartPointer<vtkCellArray>::New();
+	triangles = mesh->GetPolys();
+	m_surfaceTriangles.resize(nbTriangles);
+	for (unsigned int i=0; i<nbTriangles; i++)
+	{
+		triangles->GetNextCell(idList);
+		m_surfaceTriangles[i] = Vector3i(static_cast<int>(idList->GetId(0)), static_cast<int>(idList->GetId(1)), static_cast<int>(idList->GetId(2)));
+	}
+	//Creation of the normal per vertex
+	for (unsigned int i=0; i<nbTriangles; i++)
+	{
+		Vector3f currentNormal = (m_surfacePoints[static_cast<unsigned int>(m_surfaceTriangles[i](1))]-m_surfacePoints[static_cast<unsigned int>(m_surfaceTriangles[i](0))])
+								 .cross(m_surfacePoints[static_cast<unsigned int>(m_surfaceTriangles[i](2))]-m_surfacePoints[static_cast<unsigned int>(m_surfaceTriangles[i](1))]);
+		for (unsigned int j=0; j<3; j++)
+		{
+			nbNormals[static_cast<unsigned int>(m_surfaceTriangles[i](j))]++;
+			m_surfaceNormals[static_cast<unsigned int>(m_surfaceTriangles[i](j))]+=currentNormal;
+		}
+	}
+	for (unsigned int i=0; i<nbVertices; i++)
+	{
+		m_surfaceNormals[i]/=nbNormals[i];
+		m_surfaceNormals[i].normalized();
+	}
+	glGenVertexArrays(1, &m_vaoSurface);
+	glCreateBuffers(1, &m_vboSurface);
+	glCreateBuffers(1, &m_eboSurface);
+	glBindVertexArray(m_vaoSurface);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vboSurface); PRINT_OPENGL_ERROR();
+	glBufferData(GL_ARRAY_BUFFER, m_surfacePoints.size()*3*sizeof(float)*2, NULL, GL_STATIC_DRAW); PRINT_OPENGL_ERROR();
+	glBufferSubData(GL_ARRAY_BUFFER, 0, m_surfacePoints.size()*3*sizeof(float), m_surfacePoints.data()); PRINT_OPENGL_ERROR();
+	glBufferSubData(GL_ARRAY_BUFFER, m_surfacePoints.size()*3*sizeof(float), m_surfacePoints.size()*3*sizeof(float), m_surfaceNormals.data()); PRINT_OPENGL_ERROR();
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_eboSurface); PRINT_OPENGL_ERROR();
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_surfaceTriangles.size()*3*sizeof(int), m_surfaceTriangles.data(), GL_STATIC_DRAW); PRINT_OPENGL_ERROR();
+
+	cout << "Surface " << surface_file << " loaded" << endl;
+	//bvh = new BVH(m_surfaceTriangles, m_surfacePoints);
+	//rtcInitialize();
+	cout << "Initialization complete" << endl;
 #endif
 }
 

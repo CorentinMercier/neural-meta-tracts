@@ -7,8 +7,14 @@ layout (location = 0) out vec4 color;
 
 uniform vec3 light=vec3(0.5,0.3,5.0);
 
+uniform bool wireframeMode;
+
 void main(void)
 {
+	vec4 fiberColor = evalColor;
+	if (wireframeMode)
+		fiberColor = vec4(0.0, 0.0, 0.0, 0.0);
+		
 	vec3 normal=normalize(n);
 	vec3 lightDirection=normalize(light-p);
 	vec3 userDirection=normalize(-p);
@@ -18,5 +24,5 @@ void main(void)
     float specular_term=0.5*pow(clamp(dot(reflexion, userDirection),0.0,1.0),64.0);
     float ambiant_term=0.4;
 
-    color = (ambiant_term+diffuse_term)*evalColor+specular_term*vec4(1.0, 1.0, 1.0, 0.0);//vec4(0.0, 0.5, 0.9, 1.0);  vec4(n, 0.0);//
+    color = (ambiant_term+diffuse_term)*fiberColor+specular_term*vec4(1.0, 1.0, 1.0, 0.0);//vec4(0.0, 0.5, 0.9, 1.0);  vec4(n, 0.0);//
 }

@@ -6,11 +6,6 @@
 #include <limits>
 #include "fiber.h"
 
-#include <Eigen/Core>
-#include <Eigen/Sparse>
-#include <Eigen/Geometry>
-#include <Eigen/Dense>
-
 #define WEIGHTEDCURRENTSSIMILARITY 0
 #define QBMETRIC 1
 #define WEIGHTEDCURRENTS 2
@@ -20,36 +15,33 @@
 
 
 using namespace std;
-using namespace Eigen;
-
-//static unsigned int metric;
 
 class Fuzzy
 {
 public:
-    Fuzzy(string data);
-    ~Fuzzy();
+	Fuzzy(string data);
+	~Fuzzy();
 
-    unsigned int getValueFromPoint(Vector3f p) const;
-    float getValueFromSegment(Vector3f p1, Vector3f p2) const;
-    float getValueFromVolume(Vector3f pointBefore, Transfo T1, Transfo T2, Vector3f pointAfter) const;
-    float getDistanceToMask(Vector3f pt);
-    float getDistanceToMaskFromSurface(Transfo T, Vector3f tangent);
-    void computeDistanceField();
+	unsigned int getValueFromPoint(glm::vec3 p) const;
+	float getValueFromSegment(glm::vec3 p1, glm::vec3 p2) const;
+	float getValueFromVolume(glm::vec3 pointBefore, Transfo T1, Transfo T2, glm::vec3 pointAfter) const;
+	float getDistanceToMask(glm::vec3 pt);
+	float getDistanceToMaskFromSurface(Transfo T, glm::vec3 tangent);
+	void computeDistanceField();
 
 private:
-    string m_filenameData;
+	string m_filenameData;
 
-    Matrix4f m_affineTransfo;
-    Matrix4f m_affineTransfoInverse;
-    unsigned int m_dimX;
-    unsigned int m_dimY;
-    unsigned int m_dimZ;
-    Vector3f voxelDimensionsInCm;
+	glm::mat4 m_affineTransfo;
+	glm::mat4 m_affineTransfoInverse;
+	unsigned int m_dimX;
+	unsigned int m_dimY;
+	unsigned int m_dimZ;
+	glm::vec3 voxelDimensionsInCm;
 
-    vector<int> m_data;
-    vector<Vector3f> m_contourPts;
-    vector<float> m_distance;
+	vector<int> m_data;
+	vector<glm::vec3> m_contourPts;
+	vector<float> m_distance;
 };
 
 #endif // FUZZY_H

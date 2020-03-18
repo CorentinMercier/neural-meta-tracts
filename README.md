@@ -11,27 +11,35 @@ Biomedical Imaging, Apr 2019, Venice, Italy.
 
 This is not the exact same version of the source code that is used to measure performance for the corresponding papers. Performance might have been slightly affected during refactoring.
 
-Copyright(C) 2019 Corentin Mercier, Alessandro Delmonte, Pietro Gori, Damien Rohmer, Marie-Paule Cani, Tamy Boubekeur, Jean-Marc Thiery and Isabelle Bloch
+Copyright(C) 2019-2020 Corentin Mercier, Alessandro Delmonte, Pietro Gori, Damien Rohmer, Marie-Paule Cani, Tamy Boubekeur, Jean-Marc Thiery and Isabelle Bloch
 
 All right reserved
 
 ## Release Notes ##
-### v1.0 ###
-Initial version
+### v1.01 ###
+Initial version with a few improvements
 
 ## Dependences
 
-This software requires some external librries to run, which are:
+This software requires some external libraries to run, which are:
 * git
-* cmake (version > 3.9)
+* cmake (version >= 3.12)
 * g++
-* qt4
-* glew
-* openmp
+* qt5
+* openmp (optional)
 
 To install everything on ubuntu, use the following command line:
 ```
-sudo apt install git cmake g++ qt4-default libglew-dev libomp-dev
+sudo apt install git g++ qtbase5-dev libomp-dev
+```
+To obtain the version 3.12 of cmake, use:
+```
+wget https://cmake.org/files/v3.12/cmake-3.12.4.tar.gz
+tar -xzvf cmake-3.12.4.tar.gz
+cd cmake-3.12.4
+./bootstrap
+make -j8
+sudo make install
 ```
 
 ## Building and Running
